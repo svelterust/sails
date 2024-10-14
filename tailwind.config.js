@@ -10,5 +10,5 @@ export default {
             center: true,
         },
     },
-    plugins: [require("@tailwindcss/typography")],
+    plugins: [],
 };
