@@ -8,8 +8,8 @@
         <h1 class="mb-0">Sails</h1>
 
         <div class="flex gap-2">
-            <a href="/register" role="button">Register</a>
             <a href="/login" role="button">Login</a>
+            <a href="/register" role="button">Register</a>
         </div>
     </div>
 </nav>

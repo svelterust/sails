@@ -6,7 +6,7 @@ const config = {
     preprocess: vitePreprocess(),
     vitePlugin: {
         inspector: {
-            toggleKeyCombo: "alt-shift",
+            toggleKeyCombo: "shift-meta",
         },
     },
     kit: {

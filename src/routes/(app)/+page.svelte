@@ -1,1 +1,1 @@
-<p>Create a new account to get started.</p>
+<p>Create a new account or login to get started.</p>
