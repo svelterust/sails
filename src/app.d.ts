@@ -1,11 +1,11 @@
 import { type Database } from "$lib/db";
-import { type User, type Session } from "$lib/schema";
+import { type SafeUser, type Session } from "$lib/schema";
 
 declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      user: User | null;
+      user: SafeUser | null;
       session: Session | null;
     }
     // interface PageData {}

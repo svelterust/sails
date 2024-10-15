@@ -18,4 +18,5 @@ export const sessionTable = sqliteTable("session", {
 });
 
 export type User = InferSelectModel<typeof userTable>;
+export type SafeUser = Omit<User, "passwordHash">;
 export type Session = InferSelectModel<typeof sessionTable>;

@@ -1,9 +1,9 @@
 import { db } from "./db";
-import { eq } from "drizzle-orm";
-import { type Cookies } from "@sveltejs/kit";
+import { eq, getTableColumns } from "drizzle-orm";
 import { argon2Verify, argon2id, sha256 } from "hash-wasm";
-import { sessionTable, userTable, type User, type Session } from "./schema";
-import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
+import { sessionTable, userTable, type Session, type SafeUser } from "./schema";
+import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
+import { type Cookies } from "@sveltejs/kit";
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
@@ -48,11 +48,16 @@ export async function createSession(token: string, userId: number): Promise<Sess
   return session;
 }
 
+export async function deleteSessionFromDb(sessionId: string): Promise<void> {
+  await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
+}
+
 export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
   // Check if session exists
   const sessionId = await generateSessionId(token);
+  const { passwordHash, ...safeUserTable } = getTableColumns(userTable);
   const result = await db
-    .select({ user: userTable, session: sessionTable })
+    .select({ user: safeUserTable, session: sessionTable })
     .from(sessionTable)
     .innerJoin(userTable, eq(sessionTable.userId, userTable.id))
     .where(eq(sessionTable.id, sessionId));
@@ -61,7 +66,7 @@ export async function validateSessionToken(token: string): Promise<SessionValida
 
   // If session has expired, delete it
   if (Date.now() >= session.expiresAt.getTime()) {
-    await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
+    await deleteSessionFromDb(sessionId);
     return { session: null, user: null };
   }
 
@@ -123,6 +128,11 @@ export async function login(email: string, password: string, cookies: Cookies): 
   setSessionTokenCookie(token, session.expiresAt, cookies);
 }
 
+export function logout(sessionId: string, cookies: Cookies): void {
+  deleteSessionFromDb(sessionId);
+  deleteSessionTokenCookie(cookies);
+}
+
 export async function getUserAndSession(cookies: Cookies): Promise<SessionValidationResult> {
   // Check session cookie
   const token = cookies.get("session");
@@ -139,4 +149,4 @@ export async function getUserAndSession(cookies: Cookies): Promise<SessionValida
   return { user: null, session: null };
 }
 
-export type SessionValidationResult = { session: Session; user: User } | { session: null; user: null };
+export type SessionValidationResult = { session: Session; user: SafeUser } | { session: null; user: null };
