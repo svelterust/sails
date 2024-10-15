@@ -10,7 +10,7 @@ bun dev
 
 ## Adding new migrations
 
-After modifying `src/lib/schema`, run:
+After modifying `src/lib/schema.ts`, run:
 
 ```
 bun db:generate
