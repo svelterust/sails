@@ -2,6 +2,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { type User, type Session, sessionTable, userTable } from "./schema";
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
+import type { RequestEvent } from "@sveltejs/kit";
 
 function getSessionId(token: string): string {
   const bytes = new Uint8Array(32);
@@ -60,6 +61,24 @@ export async function validateSessionToken(token: string): Promise<SessionValida
 
 export async function invalidateSession(sessionId: string): Promise<void> {
   await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
+}
+
+export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date) {
+  event.cookies.set("session", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    expires: expiresAt,
+    path: "/"
+  });
+}
+
+export function deleteSessionTokenCookie(event: RequestEvent) {
+  event.cookies.set("session", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/"
+  });
 }
 
 export type SessionValidationResult =
