@@ -1,8 +1,7 @@
 import { db } from "./db";
 import { eq, getTableColumns } from "drizzle-orm";
-import { argon2Verify, argon2id, sha256 } from "hash-wasm";
 import { sessionTable, userTable, type Session, type SafeUser } from "./schema";
-import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
+import { decodeHex, encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { type Cookies } from "@sveltejs/kit";
 
 export function generateSessionToken(): string {
@@ -12,28 +11,53 @@ export function generateSessionToken(): string {
 }
 
 export async function generateSessionId(token: string): Promise<string> {
-  return sha256(token);
+  const data = new TextEncoder().encode(token);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return encodeHexLowerCase(new Uint8Array(hash));
 }
 
+// Configuration for hashing
+const config = {
+  hashBytes: 32,
+  saltBytes: 16,
+  iterations: 100000
+};
+
 export async function hashPassword(password: string): Promise<string> {
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  return argon2id({
-    password,
-    salt: bytes,
-    parallelism: 1,
-    iterations: 2,
-    memorySize: 19 * 1024,
-    hashLength: 32,
-    outputType: "encoded",
-  });
+  // Generate salt and buffer
+  const salt = new Uint8Array(config.saltBytes);
+  crypto.getRandomValues(salt);
+  const passwordBuffer = new TextEncoder().encode(password);
+
+  // Derive key using PBKDF2
+  const key = await crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveBits"]);
+  const derivedKey = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: config.iterations, hash: "SHA-256" }, key, config.hashBytes * 8);
+
+  // Combine salt and hashed password
+  const newHash = new Uint8Array(config.saltBytes + config.hashBytes);
+  newHash.set(salt, 0);
+  newHash.set(new Uint8Array(derivedKey), config.saltBytes);
+  return encodeHexLowerCase(newHash);
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return argon2Verify({
-    password,
-    hash,
-  });
+  // Extract hash
+  const hashBytes = decodeHex(hash);
+  const salt = hashBytes.slice(0, 16);
+  const oldHash = hashBytes.slice(16);
+
+  // Encode password
+  const passwordBuffer = new TextEncoder().encode(password);
+  const key = await crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveBits"]);
+  const derivedKey = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: config.iterations, hash: "SHA-256" }, key, 256);
+  const newHash = new Uint8Array(derivedKey);
+
+  // Compare the data
+  if (oldHash.length != newHash.length)
+    return false;
+  for (let i in oldHash)
+    if (oldHash[i] != newHash[i]) return false;
+  return true;
 }
 
 export async function createSession(token: string, userId: number): Promise<Session> {
