@@ -1,14 +1,9 @@
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import { type User, type Session, sessionTable, userTable } from "./schema";
+import { type Cookies } from "@sveltejs/kit";
+import { argon2Verify, argon2id, sha256 } from "hash-wasm";
+import { sessionTable, userTable, type User, type Session } from "./schema";
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
-import type { RequestEvent } from "@sveltejs/kit";
-
-function getSessionId(token: string): string {
-  const bytes = new Uint8Array(32);
-  Bun.SHA256.hash(token, bytes);
-  return encodeHexLowerCase(bytes);
-}
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
@@ -16,13 +11,38 @@ export function generateSessionToken(): string {
   return encodeBase32LowerCaseNoPadding(bytes);
 }
 
+export async function generateSessionId(token: string): Promise<string> {
+  return sha256(token);
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return argon2id({
+    password,
+    salt: bytes,
+    parallelism: 1,
+    iterations: 2,
+    memorySize: 19 * 1024,
+    hashLength: 32,
+    outputType: "encoded",
+  });
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return argon2Verify({
+    password,
+    hash,
+  });
+}
+
 export async function createSession(token: string, userId: number): Promise<Session> {
   // Create session and insert into database
-  const sessionId = getSessionId(token);
+  const sessionId = await generateSessionId(token);
   const session: Session = {
     id: sessionId,
     userId,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
   };
   await db.insert(sessionTable).values(session);
   return session;
@@ -30,7 +50,7 @@ export async function createSession(token: string, userId: number): Promise<Sess
 
 export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
   // Check if session exists
-  const sessionId = getSessionId(token);
+  const sessionId = await generateSessionId(token);
   const result = await db
     .select({ user: userTable, session: sessionTable })
     .from(sessionTable)
@@ -41,7 +61,7 @@ export async function validateSessionToken(token: string): Promise<SessionValida
 
   // If session has expired, delete it
   if (Date.now() >= session.expiresAt.getTime()) {
-    await db.delete(sessionTable).where(eq(sessionTable.id, session.id));
+    await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
     return { session: null, user: null };
   }
 
@@ -52,35 +72,71 @@ export async function validateSessionToken(token: string): Promise<SessionValida
     await db
       .update(sessionTable)
       .set({
-        expiresAt: session.expiresAt
+        expiresAt: session.expiresAt,
       })
       .where(eq(sessionTable.id, session.id));
   }
   return { session, user };
 }
 
-export async function invalidateSession(sessionId: string): Promise<void> {
-  await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
-}
-
-export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date) {
-  event.cookies.set("session", token, {
+function setSessionTokenCookie(token: string, expiresAt: Date, cookies: Cookies): void {
+  cookies.set("session", token, {
     httpOnly: true,
     sameSite: "lax",
     expires: expiresAt,
-    path: "/"
+    path: "/",
   });
 }
 
-export function deleteSessionTokenCookie(event: RequestEvent) {
-  event.cookies.set("session", "", {
+function deleteSessionTokenCookie(cookies: Cookies): void {
+  cookies.set("session", "", {
     httpOnly: true,
     sameSite: "lax",
     maxAge: 0,
-    path: "/"
+    path: "/",
   });
 }
 
-export type SessionValidationResult =
-  | { session: Session; user: User }
-  | { session: null; user: null };
+export async function register(email: string, password: string): Promise<void> {
+  // Insert into database
+  const passwordHash = await hashPassword(password);
+  await db.insert(userTable).values({ email, passwordHash });
+}
+
+export async function login(email: string, password: string, cookies: Cookies): Promise<void> {
+  // Get user from database
+  const users = await db.select().from(userTable).where(eq(userTable.email, email));
+  if (users.length == 0) {
+    throw new Error("E-mail or password is invalid");
+  }
+  const user = users[0];
+
+  // Verify password
+  const correctPassword = await verifyPassword(password, user.passwordHash);
+  if (!correctPassword) {
+    throw new Error("E-mail or password is invalid");
+  }
+
+  // Create session and set cookie
+  const token = generateSessionToken();
+  const session = await createSession(token, user.id);
+  setSessionTokenCookie(token, session.expiresAt, cookies);
+}
+
+export async function getUserAndSession(cookies: Cookies): Promise<SessionValidationResult> {
+  // Check session cookie
+  const token = cookies.get("session");
+  if (!token) return { user: null, session: null };
+
+  // Validate token
+  const { user, session } = await validateSessionToken(token);
+  if (user && session) {
+    setSessionTokenCookie(token, session.expiresAt, cookies);
+    return { user, session };
+  } else {
+    deleteSessionTokenCookie(cookies);
+  }
+  return { user: null, session: null };
+}
+
+export type SessionValidationResult = { session: Session; user: User } | { session: null; user: null };

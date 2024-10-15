@@ -3,8 +3,8 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const userTable = sqliteTable("user", {
   id: integer("id").primaryKey(),
-  email: text("email").notNull(),
-  password: text("password").notNull(),
+  email: text("email").unique().notNull(),
+  passwordHash: text("passwordHash").notNull(),
 });
 
 export const sessionTable = sqliteTable("session", {
@@ -13,8 +13,8 @@ export const sessionTable = sqliteTable("session", {
     .notNull()
     .references(() => userTable.id),
   expiresAt: integer("expires_at", {
-    mode: "timestamp"
-  }).notNull()
+    mode: "timestamp",
+  }).notNull(),
 });
 
 export type User = InferSelectModel<typeof userTable>;

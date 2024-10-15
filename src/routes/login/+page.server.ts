@@ -1,7 +1,9 @@
 import type { Actions, PageServerLoad } from "./$types";
 import { z } from "zod";
 import { zod } from "sveltekit-superforms/adapters";
-import { fail, superValidate } from "sveltekit-superforms";
+import { fail, setError, superValidate } from "sveltekit-superforms";
+import { login } from "$lib/auth";
+import { redirect } from "@sveltejs/kit";
 
 const schema = z.object({
   email: z.string().email(),
@@ -16,13 +18,19 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request }) => {
+  default: async ({ request, cookies }) => {
     // Validate form
     const form = await superValidate(request, zod(schema));
     if (!form.valid) return fail(400, { form });
     const { email, password } = form.data;
 
-    // Login
-
+    // Login user
+    try {
+      await login(email, password, cookies);
+    } catch (error) {
+      console.error(error);
+      return setError(form, "password", "Email or password is invalid");
+    }
+    return redirect(303, "/");
   },
 };
