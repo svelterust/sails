@@ -1,0 +1,13 @@
+{
+    "version": "7",
+    "dialect": "sqlite",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "6",
+            "when": 1728920177732,
+            "tag": "0000_dark_shooting_star",
+            "breakpoints": true
+        }
+    ]
+}
