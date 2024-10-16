@@ -13,7 +13,7 @@
     <div class="grid grid-cols-3 gap-4">
       {#each files as { path, url }}
         <div>
-          <img src={url} alt="Image" />
+          <img src={url} alt="Thumbnail" width="640" height="480" />
           <a class="mt-2 w-full" href={`/remove/${path}`} role="button">Remove</a>
         </div>
       {/each}

@@ -26,7 +26,7 @@ export const actions: Actions = {
 
     // Resize image
     const buffer = await file.arrayBuffer();
-    const resizedImage = await sharp(buffer).resize(640).webp().toBuffer();
+    const resizedImage = await sharp(buffer).resize(640, 480, { fit: "fill" }).webp().toBuffer();
     const path = file.name.substring(0, file.name.lastIndexOf(".")) + ".webp";
 
     // Upload file
