@@ -40,6 +40,8 @@ FROM base
 COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/package.json /app
+COPY --from=build /app/migrations /app/migrations
+COPY --from=build /app/drizzle.config.ts /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
