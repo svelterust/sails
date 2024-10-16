@@ -4,7 +4,7 @@ import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectC
 
 // Helpers for storage
 const folder = "storage/";
-await fs.mkdir(folder);
+await fs.mkdir(folder, { recursive: true });
 const s3 = () => env.AWS_ACCESS_KEY_ID && env.AWS_ENDPOINT_URL_S3 && env.AWS_SECRET_ACCESS_KEY && env.BUCKET_NAME && env.AWS_REGION;
 const s3Client = s3() ? new S3Client({ region: env.AWS_REGION, endpoint: env.AWS_ENDPOINT_URL_S3 }) : null;
 
