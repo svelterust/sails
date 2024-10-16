@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun --bun vite dev",
-    "build": "bun --bun vite build",
-    "preview": "bun --bun vite preview",
+    "dev": "bun vite dev",
+    "build": "bun vite build",
+    "preview": "bun vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check .",
@@ -16,6 +16,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.9",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
     "@sveltejs/vite-plugin-svelte-inspector": "^2.1.0",

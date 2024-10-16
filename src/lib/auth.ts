@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { eq, getTableColumns } from "drizzle-orm";
 import { sessionTable, userTable, type Session, type SafeUser } from "./schema";
-import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
+import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
 import { type Cookies } from "@sveltejs/kit";
 
 export function generateSessionToken(): string {
