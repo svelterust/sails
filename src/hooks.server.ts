@@ -1,5 +1,5 @@
 import { type Handle } from "@sveltejs/kit";
-import { getUserAndSession } from "$lib/auth";
+import { getUserAndSession } from "$lib/session";
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Extract user and session from cookies

@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from "./$types";
 import { z } from "zod";
 import { zod } from "sveltekit-superforms/adapters";
 import { fail, setError, superValidate } from "sveltekit-superforms";
-import { login } from "$lib/auth";
+import { login } from "$lib/session";
 import { redirect } from "@sveltejs/kit";
 
 const schema = z.object({

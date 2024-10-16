@@ -1,6 +1,6 @@
-import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { logout } from "$lib/auth";
+import { redirect } from "@sveltejs/kit";
+import { logout } from "$lib/session";
 
 export const GET: RequestHandler = async ({ cookies, locals: { session } }) => {
   // Logout
