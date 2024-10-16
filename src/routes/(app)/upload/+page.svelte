@@ -22,7 +22,7 @@
   <Field {form} name="file">
     <Control let:attrs>
       <Label>File</Label>
-      <input {...attrs} bind:value={$formData.file} type="file" />
+      <input {...attrs} bind:value={$formData.file} type="file" accept="image/jpeg" />
     </Control>
     <small><FieldErrors /></small>
   </Field>

@@ -26,6 +26,8 @@ export const actions: Actions = {
 
     // Upload file
     const url = await upload(path, file);
-    return redirect(303, url);
+    if (url) {
+      return redirect(303, "/");
+    }
   },
 };

@@ -1,5 +1,6 @@
+import fs from "fs/promises";
 import { env } from "$env/dynamic/private";
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 // Helpers for storage
 const folder = "storage/";
@@ -21,7 +22,6 @@ export async function upload(path: string, data: Blob): Promise<string | null> {
     };
     await s3Client.send(new PutObjectCommand(params));
   } else {
-    if (path.startsWith("..") || path.includes("../")) return null;
     await Bun.write(folder + path, data);
   }
   return urlFor(path);
@@ -41,12 +41,24 @@ export async function download(path: string): Promise<ReadableStream | Blob | nu
       return null;
     }
   } else {
-    if (path.startsWith("..") || path.includes("../")) return null;
     return Bun.file(folder + path);
   }
 }
 
-// List files in path and returns path
-export async function list(path: string): Promise<string[]> {
-  return [];
+// List files in path and returns path to files
+export async function list(path: string = ""): Promise<string[]> {
+  if (s3Client) {
+    const params = {
+      Bucket: env.BUCKET_NAME,
+      Prefix: path,
+    };
+    const data = await s3Client.send(new ListObjectsV2Command(params));
+    if (data.Contents) {
+      return data.Contents.flatMap((item) => (item.Key ? [item.Key] : []));
+    } else {
+      return [];
+    }
+  } else {
+    return fs.readdir(folder + path);
+  }
 }
