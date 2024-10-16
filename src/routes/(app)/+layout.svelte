@@ -10,7 +10,7 @@
       <h1 class="mb-0">Sails</h1>
     </a>
 
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2">
       {#if user}
         <a href="/upload" role="button">Upload</a>
         <a href="/logout" role="button">Logout</a>
