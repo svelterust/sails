@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import { env } from "$env/dynamic/private";
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 // Helpers for storage
 const folder = "storage/";
@@ -37,12 +37,11 @@ export async function download(path: string): Promise<ReadableStream | Blob | nu
     const data = await s3Client.send(new GetObjectCommand(params));
     if (data.Body) {
       return data.Body.transformToWebStream();
-    } else {
-      return null;
     }
   } else {
     return Bun.file(folder + path);
   }
+  return null;
 }
 
 // List files in path and returns path to files
@@ -55,10 +54,22 @@ export async function list(path: string = ""): Promise<string[]> {
     const data = await s3Client.send(new ListObjectsV2Command(params));
     if (data.Contents) {
       return data.Contents.flatMap((item) => (item.Key ? [item.Key] : []));
-    } else {
-      return [];
     }
   } else {
     return fs.readdir(folder + path);
+  }
+  return [];
+}
+
+// Remove file from system
+export async function remove(path: string): Promise<void> {
+  if (s3Client) {
+    const params = {
+      Bucket: env.BUCKET_NAME,
+      Key: path,
+    };
+    await s3Client.send(new DeleteObjectCommand(params));
+  } else {
+    await fs.unlink(folder + path);
   }
 }
