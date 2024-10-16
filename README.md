@@ -1,21 +1,14 @@
 # sails
 
-To get started, copy and paste in your terminal:
+To get started, run folowing:
 
 ```
 git clone https://github.com/knarkzel/sails
 cd sails/
-bun i
-echo "TURSO_DATABASE_URL=file:database.db" > .env
-bun db:migrate
+bun install
 bun dev
 ```
 
 ## Migrations
 
-After modifying `src/lib/schema.ts`, run:
-
-```
-bun db:generate
-bun db:migrate
-```
+After modifying `src/lib/schema.ts`, generate migration files with `bun db:generate`.

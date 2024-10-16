@@ -43,6 +43,6 @@ COPY --from=build /app/package.json /app
 COPY --from=build /app/migrations /app/migrations
 COPY --from=build /app/drizzle.config.ts /app
 
-# Start the server by default, this can be overwritten at runtime
+# Start the server
 EXPOSE 3000
 CMD [ "bun", "./build/index.js" ]

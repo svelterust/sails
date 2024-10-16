@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { eq, getTableColumns } from "drizzle-orm";
 import { sessionTable, userTable, type Session, type SafeUser } from "./schema";
-import { encodeBase32LowerCaseNoPadding } from "@oslojs/encoding";
+import { decodeHex, encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { type Cookies } from "@sveltejs/kit";
 
 export function generateSessionToken(): string {
@@ -11,21 +11,73 @@ export function generateSessionToken(): string {
 }
 
 export async function generateSessionId(token: string): Promise<string> {
-  const hasher = new Bun.CryptoHasher("sha256");
-  hasher.update(token);
-  return hasher.digest("hex");
+  if (typeof Bun !== "undefined") {
+    const hasher = new Bun.CryptoHasher("sha256");
+    hasher.update(token);
+    return hasher.digest("hex");
+  } else {
+    const data = new TextEncoder().encode(token);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    return encodeHexLowerCase(new Uint8Array(hash));
+  }
 }
 
+// Configuration for hashing that works on Cloudflare Pages
+const config = {
+  hashBytes: 32,
+  saltBytes: 16,
+  iterations: 100000,
+};
+
 export async function hashPassword(password: string): Promise<string> {
-  return Bun.password.hash(password, {
-    algorithm: "argon2id",
-    memoryCost: 19 * 1024,
-    timeCost: 2,
-  });
+  if (typeof Bun !== "undefined") {
+    return Bun.password.hash(password, {
+      algorithm: "argon2id",
+      memoryCost: 19 * 1024,
+      timeCost: 2,
+    });
+  } else {
+    // Generate salt and buffer
+    const salt = new Uint8Array(config.saltBytes);
+    crypto.getRandomValues(salt);
+    const passwordBuffer = new TextEncoder().encode(password);
+
+    // Derive key using PBKDF2
+    const key = await crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveBits"]);
+    const derivedKey = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", salt, iterations: config.iterations, hash: "SHA-256" },
+      key,
+      config.hashBytes * 8,
+    );
+
+    // Combine salt and hashed password
+    const newHash = new Uint8Array(config.saltBytes + config.hashBytes);
+    newHash.set(salt, 0);
+    newHash.set(new Uint8Array(derivedKey), config.saltBytes);
+    return encodeHexLowerCase(newHash);
+  }
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return Bun.password.verify(password, hash);
+  if (typeof Bun !== "undefined") {
+    return Bun.password.verify(password, hash);
+  } else {
+    // Extract hash
+    const hashBytes = decodeHex(hash);
+    const salt = hashBytes.slice(0, 16);
+    const oldHash = hashBytes.slice(16);
+
+    // Encode password
+    const passwordBuffer = new TextEncoder().encode(password);
+    const key = await crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveBits"]);
+    const derivedKey = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: config.iterations, hash: "SHA-256" }, key, 256);
+    const newHash = new Uint8Array(derivedKey);
+
+    // Compare the data
+    if (oldHash.length != newHash.length) return false;
+    for (let i in oldHash) if (oldHash[i] != newHash[i]) return false;
+    return true;
+  }
 }
 
 export async function createSession(token: string, userId: number): Promise<Session> {

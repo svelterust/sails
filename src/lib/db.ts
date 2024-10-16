@@ -10,7 +10,7 @@ const turso = createClient({
   authToken: env.TURSO_AUTH_TOKEN,
 });
 export const db = drizzle(turso, { schema });
-await migrate(db, { migrationsFolder: "migrations" })
+await migrate(db, { migrationsFolder: "migrations" });
 
 // Type
 export type Database = typeof db;
