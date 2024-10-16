@@ -8,7 +8,7 @@
   const { form: formData, delayed, submitting, enhance } = form;
 </script>
 
-<div class="flex h-screen items-center justify-center">
+<div class="flex h-screen items-center justify-center px-4">
   <div class="max-w-sm flex-grow">
     <h1>Register</h1>
 

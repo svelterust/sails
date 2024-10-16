@@ -10,7 +10,7 @@
   {#if files.length > 0}
     <h2>Images uploaded</h2>
 
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid gap-4 md:grid-cols-3">
       {#each files as { path, url }}
         <div>
           <img src={url} alt="Thumbnail" width="640" height="480" />
