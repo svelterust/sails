@@ -10,7 +10,11 @@ const turso = createClient({
   authToken: env.TURSO_AUTH_TOKEN,
 });
 export const db = drizzle(turso, { schema });
-await migrate(db, { migrationsFolder: "migrations" });
+
+// Only run migrations when using Bun, Cloudflare Pages doesn't support this
+if (typeof Bun !== "undefined") {
+  await migrate(db, { migrationsFolder: "migrations" });
+}
 
 // Type
 export type Database = typeof db;
