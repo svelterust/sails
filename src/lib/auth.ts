@@ -1,4 +1,4 @@
-import { db } from "./db";
+import { db } from "./database";
 import { eq, getTableColumns } from "drizzle-orm";
 import { sessionTable, userTable, type Session, type SafeUser } from "./schema";
 import { decodeHex, encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";

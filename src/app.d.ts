@@ -1,4 +1,4 @@
-import { type Database } from "$lib/db";
+import { type Database } from "$lib/database";
 import { type SafeUser, type Session } from "$lib/schema";
 
 declare global {
@@ -14,4 +14,4 @@ declare global {
   }
 }
 
-export {};
+export { };
