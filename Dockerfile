@@ -17,7 +17,7 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3 ca-certificates
 
 # Install node modules
 COPY bun.lockb package.json ./
@@ -36,12 +36,13 @@ RUN rm -rf node_modules && \
 # Final stage for app image
 FROM base
 
-# Copy built application
+# Copy application
 COPY --from=build /app/build /app/build
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/package.json /app
 COPY --from=build /app/migrations /app/migrations
 COPY --from=build /app/drizzle.config.ts /app
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Start the server
 EXPOSE 3000
