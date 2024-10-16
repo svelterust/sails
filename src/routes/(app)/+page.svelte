@@ -5,7 +5,7 @@
 </script>
 
 {#if user}
-  <p>You are logged in as {user.email}</p>
+  <p>You are currently logged in as {user.email}</p>
 
   {#if files.length > 0}
     <h2>Images uploaded</h2>
