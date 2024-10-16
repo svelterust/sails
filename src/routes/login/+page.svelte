@@ -5,7 +5,7 @@
   // Props
   const { data } = $props();
   const form = superForm(data.form);
-  const { form: formData, submitting, enhance } = form;
+  const { form: formData, delayed, submitting, enhance } = form;
 </script>
 
 <div class="flex h-screen items-center justify-center">
@@ -29,7 +29,7 @@
         <small><FieldErrors /></small>
       </Field>
 
-      <button type="submit" aria-busy={$submitting} disabled={$submitting}>Login</button>
+      <button type="submit" aria-busy={$delayed} disabled={$submitting}>Login</button>
     </form>
 
     <p class="text-center">
