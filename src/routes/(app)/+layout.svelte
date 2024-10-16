@@ -6,10 +6,13 @@
 
 <nav class="mb-4 bg-slate-100">
   <div class="container flex items-center justify-between p-4">
-    <h1 class="mb-0">Sails</h1>
+    <a class="no-underline" href="/">
+      <h1 class="mb-0">Sails</h1>
+    </a>
 
-    <div class="flex gap-2">
+    <div class="flex items-center gap-4">
       {#if user}
+        <a href="/upload" role="button">Upload</a>
         <a href="/logout" role="button">Logout</a>
       {:else}
         <a href="/login" role="button">Login</a>
