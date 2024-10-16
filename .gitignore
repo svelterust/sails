@@ -21,4 +21,5 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Database
+storage
 development.sqlite
