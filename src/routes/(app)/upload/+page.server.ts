@@ -4,9 +4,9 @@ import { zod } from "sveltekit-superforms/adapters";
 import { fail, setError, superValidate } from "sveltekit-superforms";
 import { redirect } from "@sveltejs/kit";
 import { upload } from "$lib/storage";
+import sharp from "sharp";
 
 const schema = z.object({
-  path: z.string(),
   file: z.instanceof(File),
 });
 
@@ -22,10 +22,15 @@ export const actions: Actions = {
     // Validate form
     const form = await superValidate(request, zod(schema));
     if (!form.valid) return fail(400, { form });
-    const { path, file } = form.data;
+    const { file } = form.data;
+
+    // Resize image
+    const buffer = await file.arrayBuffer();
+    const resizedImage = await sharp(buffer).resize(640).webp().toBuffer();
+    const path = file.name.substring(0, file.name.lastIndexOf(".")) + ".webp";
 
     // Upload file
-    const url = await upload(path, file);
+    const url = await upload(path, resizedImage);
     if (url) {
       return redirect(303, "/");
     }

@@ -11,14 +11,6 @@
 <h1>Upload</h1>
 
 <form method="POST" enctype="multipart/form-data" use:enhance>
-  <Field {form} name="path">
-    <Control let:attrs>
-      <Label>Path</Label>
-      <input {...attrs} bind:value={$formData.path} />
-    </Control>
-    <small><FieldErrors /></small>
-  </Field>
-
   <Field {form} name="file">
     <Control let:attrs>
       <Label>File</Label>

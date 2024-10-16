@@ -13,16 +13,16 @@ export function urlFor(path: string): string {
 }
 
 // Uploads file and returns redirect URL
-export async function upload(path: string, data: Blob): Promise<string | null> {
+export async function upload(path: string, data: Buffer): Promise<string | null> {
   if (s3Client) {
     const params = {
       Bucket: env.BUCKET_NAME,
       Key: path,
-      Body: await data.bytes(),
+      Body: data,
     };
     await s3Client.send(new PutObjectCommand(params));
   } else {
-    await Bun.write(folder + path, data);
+    await Bun.write(folder + path, data.buffer);
   }
   return urlFor(path);
 }
