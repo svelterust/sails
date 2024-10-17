@@ -14,7 +14,7 @@
   <div class="max-w-sm flex-grow">
     <h1 class="mb-2 text-2xl font-bold">Register</h1>
 
-    <form method="post" use:enhance>
+    <form class="grid gap-2" method="post" use:enhance>
       <Form.Field {form} name="email">
         <Form.Control let:attrs>
           <Form.Label>Email</Form.Label>

@@ -14,7 +14,7 @@
   <div class="max-w-sm flex-grow">
     <h1 class="mb-2 text-2xl font-bold">Login</h1>
 
-    <form method="post" use:enhance>
+    <form class="grid gap-2" method="post" use:enhance>
       <Form.Field {form} name="email">
         <Form.Control let:attrs>
           <Form.Label>Email</Form.Label>
@@ -31,7 +31,7 @@
         <Form.FieldErrors />
       </Form.Field>
 
-      <Form.Button class="w-full" disabled={$submitting}>
+      <Form.Button class="mt-2 w-full" disabled={$submitting}>
         {#if $delayed}
           <Loader class="animate-spin" />
         {:else}
