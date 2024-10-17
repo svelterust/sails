@@ -43,6 +43,7 @@
     "drizzle-orm": "^0.34.1",
     "formsnap": "^1.0.1",
     "lucide-svelte": "^0.453.0",
+    "sharp": "^0.33.5",
     "sveltekit-superforms": "^2.19.1",
     "tailwind-merge": "^2.5.4",
     "tailwind-variants": "^0.2.1",

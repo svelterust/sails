@@ -14,6 +14,7 @@
 
     <div class="flex items-center gap-2">
       {#if user}
+        <Button href="/upload">Upload</Button>
         <Button href="/logout">Logout</Button>
       {:else}
         <Button href="/login">Login</Button>

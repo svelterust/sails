@@ -31,7 +31,7 @@
         <Form.FieldErrors />
       </Form.Field>
 
-      <Form.Button class="w-full" disabled={$submitting}>
+      <Form.Button disabled={$submitting}>
         {#if $delayed}
           <Loader class="animate-spin" />
         {:else}
