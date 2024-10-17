@@ -1,6 +1,8 @@
 <script lang="ts">
+  import * as Form from "$ui/form";
+  import { Input } from "$ui/input";
   import { superForm } from "sveltekit-superforms";
-  import { Field, Control, Label, FieldErrors } from "formsnap";
+  import Loader from "lucide-svelte/icons/loader";
 
   // Props
   const { data } = $props();
@@ -10,30 +12,36 @@
 
 <div class="flex h-screen items-center justify-center px-4">
   <div class="max-w-sm flex-grow">
-    <h1>Register</h1>
+    <h1 class="mb-2 text-2xl font-bold">Register</h1>
 
-    <form method="POST" use:enhance>
-      <Field {form} name="email">
-        <Control let:attrs>
-          <Label>Email</Label>
-          <input {...attrs} bind:value={$formData.email} />
-        </Control>
-        <small><FieldErrors /></small>
-      </Field>
+    <form method="post" use:enhance>
+      <Form.Field {form} name="email">
+        <Form.Control let:attrs>
+          <Form.Label>Email</Form.Label>
+          <Input {...attrs} bind:value={$formData.email} />
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
 
-      <Field {form} name="password">
-        <Control let:attrs>
-          <Label>Password</Label>
-          <input {...attrs} bind:value={$formData.password} type="password" />
-        </Control>
-        <small><FieldErrors /></small>
-      </Field>
+      <Form.Field {form} name="password">
+        <Form.Control let:attrs>
+          <Form.Label>Password</Form.Label>
+          <Input {...attrs} bind:value={$formData.password} type="password" />
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
 
-      <button type="submit" aria-busy={$delayed} disabled={$submitting}>Register</button>
+      <Form.Button class="w-full" disabled={$submitting}>
+        {#if $delayed}
+          <Loader class="animate-spin" />
+        {:else}
+          Register
+        {/if}
+      </Form.Button>
     </form>
 
-    <p class="text-center">
-      Already have an account? <a href="/login">Login</a>
+    <p class="mt-4 text-center">
+      Already have an account? <a class="underline" href="/login">Login</a>
     </p>
   </div>
 </div>

@@ -26,21 +26,26 @@
     "prettier": "^3.3.3",
     "prettier-plugin-svelte": "^3.2.7",
     "prettier-plugin-tailwindcss": "^0.6.8",
-    "svelte": "^5.0.0-next.266",
+    "svelte": "^5.0.0-next.268",
     "svelte-adapter-bun": "^0.5.2",
     "svelte-check": "^4.0.5",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
+    "unplugin-fonts": "^1.1.1",
     "vite": "^5.4.9"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.670.0",
+    "@aws-sdk/client-s3": "^3.673.0",
     "@libsql/client": "^0.14.0",
     "@oslojs/encoding": "^1.1.0",
+    "bits-ui": "^0.21.16",
+    "clsx": "^2.1.1",
     "drizzle-orm": "^0.34.1",
     "formsnap": "^1.0.1",
-    "sharp": "^0.33.5",
+    "lucide-svelte": "^0.453.0",
     "sveltekit-superforms": "^2.19.1",
+    "tailwind-merge": "^2.5.4",
+    "tailwind-variants": "^0.2.1",
     "zod": "^3.23.8"
   }
 }

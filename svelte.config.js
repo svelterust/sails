@@ -10,8 +10,12 @@ const config = {
     },
   },
   kit: {
-    adapter: adapter(),
     csrf: false,
+    adapter: adapter(),
+    alias: {
+      $shadcn: "./src/shadcn/*",
+      $ui: "./src/shadcn/components/ui/*",
+    },
   },
 };
 

@@ -28,7 +28,6 @@ export const actions: Actions = {
     try {
       await login(email, password, cookies);
     } catch (error) {
-      console.error(error);
       return setError(form, "password", "Email or password is invalid");
     }
     return redirect(303, "/");

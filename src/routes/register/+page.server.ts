@@ -29,7 +29,6 @@ export const actions: Actions = {
       await register(email, password);
       await login(email, password, cookies);
     } catch (error) {
-      console.error(error);
       return setError(form, "password", "Failed to create account");
     }
     return redirect(303, "/");
