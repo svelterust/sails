@@ -30,7 +30,7 @@ export const actions: Actions = {
     const name = image.name.substring(0, image.name.lastIndexOf("."));
 
     // Optimize images
-    const input = sharp(buffer).resize(640, 480, { fit: "inside" });
+    const input = sharp(buffer).resize(640, 480, { fit: "fill" });
     const regular = await input.clone().toFormat(format).toBuffer();
     const optimized = await input.toFormat("avif").toBuffer();
 
